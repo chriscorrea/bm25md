@@ -1,0 +1,21 @@
+run:
+  timeout: 30s
+  go: '1.24'
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - ineffassign
+    - gosec
+    - gosimple
+    - gocritic
+    - gofmt
+    - goimports
+
+issues:
+  max-same-issues: 5
+  
