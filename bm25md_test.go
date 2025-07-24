@@ -20,12 +20,12 @@ func createTestCorpus() (*Corpus, []Document) {
 		{Fields: map[Field]string{FieldBody: "Scientific research on climate patterns"}},
 		{Fields: map[Field]string{FieldBody: "Technology advances in computing"}},
 	}
-	
+
 	corpus := NewCorpus()
 	for _, doc := range docs {
 		corpus.AddDocument(doc)
 	}
-	
+
 	return corpus, docs
 }
 
@@ -207,22 +207,22 @@ func TestCorpus_Search(t *testing.T) {
 func TestCorpus_SearchParallel(t *testing.T) {
 	// create base corpus with test documents
 	smallCorpus, baseDocs := createTestCorpus()
-	
+
 	// create large corpus (100+ docs) to trigger parallel search
 	largeCorpus := NewCorpus()
-	
+
 	// add the original test documents first
 	for _, doc := range baseDocs {
 		largeCorpus.AddDocument(doc)
 	}
-	
+
 	// add 90 more filler documents to reach 100+ threshold
 	for i := 0; i < 90; i++ {
 		largeCorpus.AddDocument(Document{
 			Fields: map[Field]string{FieldBody: "Additional filler content for parallel testing"},
 		})
 	}
-	
+
 	tests := []struct {
 		name       string
 		query      string
@@ -244,41 +244,41 @@ func TestCorpus_SearchParallel(t *testing.T) {
 		{
 			name:       "common term",
 			query:      "and",
-			expectDocs: 5, // appears in multiple documents
+			expectDocs: 5,  // appears in multiple documents
 			checkID:    -1, // don't check specific ID
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// test both small (sequential) and large (parallel) corpora
 			smallResults := smallCorpus.Search(tt.query, 10)
 			largeResults := largeCorpus.Search(tt.query, 10)
-			
+
 			// verify parallel results contain expected number of docs
 			if tt.expectDocs > 0 && len(largeResults) < tt.expectDocs {
 				t.Errorf("Parallel search returned %d results, want at least %d", len(largeResults), tt.expectDocs)
 			}
-			
+
 			// verify specific document ID if provided
 			if tt.checkID >= 0 && len(largeResults) > 0 {
 				if largeResults[0].Document.ID != tt.checkID {
 					t.Errorf("Expected document with ID %d, but got %d", tt.checkID, largeResults[0].Document.ID)
 				}
 			}
-			
+
 			// verify results are sorted by score (descending)
 			for i := 1; i < len(largeResults); i++ {
 				if largeResults[i].Score > largeResults[i-1].Score {
-					t.Errorf("Results not sorted: result %d score (%f) > result %d score (%f)", 
+					t.Errorf("Results not sorted: result %d score (%f) > result %d score (%f)",
 						i, largeResults[i].Score, i-1, largeResults[i-1].Score)
 				}
 			}
-			
+
 			// verify that parallel search finds the same relevant documents
 			// (note: scores will be different due to different corpus size affecting IDF)
 			if len(smallResults) > 0 && len(largeResults) > 0 {
-				// verify that the most relevant document from sequential search 
+				// verify that the most relevant document from sequential search
 				// is also found in parallel results (though score may differ)
 				topSeqDoc := smallResults[0].Document.ID
 				found := false

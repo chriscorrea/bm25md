@@ -28,7 +28,7 @@ func main() {
 		}
 	}
 
-	// create corpus and parser  
+	// create corpus and parser
 	corpus := bm25md.NewCorpus()
 	parser := bm25md.NewMarkdownFieldParser()
 
